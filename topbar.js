@@ -1,9 +1,9 @@
 (function () {
     var pages = [
-        { label: 'Home',        path: '/public/Home/home.html' },
-        { label: 'Projects',    path: '/public/Pages/projects.html' },
-        { label: 'HLSL Editor', path: '/public/Pages/HLSLEditor.html' },
-        { label: 'Portfolio',   path: '/public/Pages/portfolio.html' },
+        { label: 'Home',        path: '/home/' },
+        { label: 'Projects',    path: '/projects/' },
+        { label: 'HLSL Editor', path: '/hlsl/' },
+        { label: 'Portfolio',   path: '/portfolio/' },
     ];
 
     var current = window.location.pathname;
@@ -15,7 +15,7 @@
 
     document.write(
         '<nav id="topbar">' +
-        '<div class="logo"><a href="/public/Home/home.html"><img src="/public/Header/Images/websitelogo_last.png" alt="Ben Ashcroft"></a></div>' +
+        '<div class="logo"><a href="/home/"><img src="/public/Header/Images/websitelogo_last.png" alt="Ben Ashcroft"></a></div>' +
         '<div class="menu"><ul>' + items + '</ul></div>' +
         '</nav>'
     );
