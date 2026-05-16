@@ -1,0 +1,49 @@
+.img-compare {
+    position: relative;
+    overflow: hidden;
+    cursor: col-resize;
+    user-select: none;
+}
+.img-compare img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    max-width: none;
+}
+.img-compare img:last-of-type {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 50% 0 0);
+}
+.img-compare input[type=range] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: col-resize;
+    margin: 0;
+}
+.img-compare .divider {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: #fff;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+.img-compare .divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0,0,0,0.5);
+}

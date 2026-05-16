@@ -1,0 +1,36 @@
+Introduction
+Pipeline creation in Unreal Engine could be considered functionally identical to any game engine, that is, considerably boring to the layman and incredibly important for a large project, which I guess is where people like me come in. Now I don't -and you shouldn't- consider me the law on the topic; and I can guarantee that anyone you come across that thinks they are, will have disagreements with almost every other person who also does. Saying this however, I'm still going to tell you how I'd create a pipeline and perhaps you'll be able to pick out some helpful pieces of information. 
+
+Naming Convention
+I'll quickly go over the naming convention that I am going to use throughout. You should Never use spaces in a file name, instead underscores '_' can be used, however this should be limited and normally camelCase or PascalCase should be adopted (this is due to underscores increasing filename length which can become a problem). It's important to note that depending on the engine that I am using I switch between the two mentioned, this is mostly because they are used in example content and it's easier to move from project to project. Case names for files is likely already something that is being done by the company you are working with, or for and as such those conventions should be upheld.
+
+ 
+
+The name of an asset should be its type then any specifiers that affect that asset. For example if you had a wide, green, fabric sofa, the correct naming convention would be SofaWideFabric, assuming that the material of the sofa changed the appearance. Sofa comes first, this causes file browsing systems to group assets of a type together. Following this you then have the descriptors of the asset, this order is somewhat of a preference decision but should be maintained throughout all similar assets and in some cases there is a clearly more useful descriptor. Green is ignored in the naming of the asset as unless this is a material it has no influence on the appearance and could easily be changed in different instances.
+
+ 
+
+The example SofaWideFabric has another issue that I haven’t covered which is the use of vague descriptors, “Wide” should really be using some kind of defined measurement e.g. the width of the mesh in cm/m or the number of people it should seat. While “Fabric” could be vague if there are multiple versions of fabric available for the asset, in such an instance you’d change the word Fabric to that material.
+
+ 
+
+The result of these changes would be “SofaCotton250cm”, noticing that the measurement was moved to the end so that it is easier to read than “Sofa250cmCotton”, the unit is also added to the end to stop any instances of a version number causing possible issues (not that this should occur but it’s better to be safe).
+
+Project Hierarchy
+Creating a project and dumping everything into the root or naming all of the assets in your project poorly are both great ways to end up deep in trouble. These are the broad strokes of what not to do, and while this will be some of what I'm covering I'll also be going deeper into the pipeline that I use on personal projects. The following will cover the process from a fresh project, not how to fix a project in mid swing, though it should still prove a useful read even given that scenario.
+
+ 
+
+Preparation is key when starting a new project, when first creating a project you're going to want to have a SourceAssets and Project folder. All the raw assets should be placed in SourceAssets folder (fbx, wav, psd etc are what you should be seeing in here). Now that doesn't mean that you stop there, the top level of folder structure will usually come down to more generalised identifiers and getting more specific. The majority of folder structures shouldn't need more than 4 levels of folders. Take the following: SourceAssets -> Environment -> Interior -> Furniture -> SofaWide250cm. You can immediately tell what each level is and what each subsequent directory level will have in it, this is often mirrored into the heirarchy of the project structure and should include any raw files and any working files (maya/substance files etc.). There is an arguement to be made for seperating the working files from the outputs or perhaps creating an output folder at the end of the chain. While this could be done, in the majority of scenarios the quantity of source files should not be large, especially if you are using source control (which everyone should unless limited by their network, eg working at university) - put a pin in this because I'll be talking more about it later.
+
+In the project folder you have the same rules as your SourceAssets folder and in fact it should majoritively mirror its structure, omitting the obvious files and folders that you do not wish to have in the final game. Blueprints(BP) tend to come under one of two different, namely: tools and runtime. These BPs can be placed in the most relevant folders, for example a lighting tool would come under Lighting -> _Tools  The meshes should be stored alongside their materials in the case of unique materials, however if there is a tiling material or similar it should be kept in a easily accessible materials folder near/at the root of the project. Further delving into the Content folder and it's heirarchy will be resolved in the corresponding sections.
+
+
+Materials
+When it comes to materials this is the area that I have come to specialise on, as such I have a specific setup when I am creating this folder structure. Content folder contains a materials folder, in which a _Masters folder lives, next to a _MaterialFunctions folder, I use underscores to keep them as the first appearing folders in the viewer. 
+
+
+Inside here lives the master materials and custom functions that I have made for materials. In the latest few projects I have worked on the Master Materials have been used for the majority of assets in the scene, there have been a hand countable number of them in total, including but not limited to SimplePBR, TexturedPBR and OrganicPBR. These materials are then instanced and sub-instanced accordingly, so a material may have one or two levels between it and the master that it is based on. This can be useful for things such as metals, where you set up the basic setup for any metal (namely 1 in metallic and apply any base scratch map you have for the roughness).
+
+
+The functionality that is provided by functions -see what I did there?- is that of replication and consistency, meaning their cases can be expanded to include more than just operations, to things such as constants, e.g. TAU (2Pi) and Distance Fields which is a Whole different topic. Some I take from project to project, PackedControls and UVControls are two which I use to speed up any texture based material that I am creating, the power of which is I instantly have grouped and named parameters that I know will be consistent across my different master materials, so if at a later date it is decided that an instance should belong to a different master then I can switch it and not lose any of those setup parameters. (if the name of a parameter is the same across materials then when re-parented the instance will keep any changed parameters).

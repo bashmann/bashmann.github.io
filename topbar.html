@@ -1,0 +1,35 @@
+<?php $activePage = basename($_SERVER['PHP_SELF'], ".php"); ?>
+<?php $pages = array(
+    "Home"        => "/public/Home/home.php",
+    "Projects"    => "/public/Pages/Projects.php",
+    "HLSL Editor" => "/public/Pages/HLSLEditor.php",
+    "Portfolio"   => "/public/Pages/portfolio.php"
+); ?>
+<nav id="topbar">
+    <div class="logo"><a href="/public/Home/home.php"><img src="/public/Header/Images/websitelogo_last.png" alt="Ben Ashcroft"></a></div>
+    <div class="menu">
+        <ul>
+            <?php
+            foreach($pages as $label => $path) :
+                $class = strcasecmp(basename($path, ".php"), $activePage) ? "unselected" : "selected";
+            ?>
+            <li class="<?= $class; ?>"><a href="<?= $path; ?>"><button class="butTxt-hid <?= $class; ?>"><?= $label; ?></button></a></li>
+            <?php
+            endforeach;
+            unset($class);
+            unset($label);
+            unset($path);
+            ?>
+            <!-- <li class = ><a href="/Content/home.php">        <button class="butTxt-def">Home     </button></a></li> -->
+            <!-- <li><a href="/Content/portfolio.php">   <button class="butTxt-def">Portfolio</button></a></li> -->
+            <!-- <li><a href="/Content/projects.php">    <button class="butTxt-def">Projects</button></a></li> -->
+            <!-- <li><a href="#">                        <button class="butTxt-def">Pipeline</button></a></li> -->
+            <!-- <li><a href="#">                        <button class="butTxt-def">About Me</button></a></li> -->
+            <!-- <li><a href="#">                        <button class="butTxt-def">CV</button></a></li> -->
+        </ul>
+    </div>
+</nav>
+
+<!-- <?php $activePage == 'home'      ? 'butTxt-act' : 'butTxt-def' ?> -->
+<!-- <?php $activePage == 'portfolio' ? 'butTxt-act' : 'butTxt-def' ?> -->
+<!-- <?php $activePage == 'projects'  ? 'butTxt-act' : 'butTxt-def' ?> -->
