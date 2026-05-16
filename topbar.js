@@ -9,7 +9,7 @@
     var current = window.location.pathname;
 
     var items = pages.map(function (p) {
-        var cls = current === p.path ? 'selected' : 'unselected';
+        var cls = (current === p.path || current.startsWith(p.path)) ? 'selected' : 'unselected';
         return '<li class="' + cls + '"><a href="' + p.path + '"><button class="butTxt-hid ' + cls + '">' + p.label + '</button></a></li>';
     }).join('');
 
