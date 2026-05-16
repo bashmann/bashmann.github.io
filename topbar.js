@@ -15,7 +15,7 @@
 
     document.write(
         '<nav id="topbar">' +
-        '<div class="logo"><a href="/"><img src="/public/Header/Images/websitelogo_last.png" alt="Ben Ashcroft"></a></div>' +
+        '<div class="logo"><a href="/"><img class="logo-img" src="/public/Header/Images/websitelogo_last.png" alt="Ben Ashcroft"></a><a class="logo-text" href="/">Ben Ashcroft</a></div>' +
         '<button id="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>' +
         '<div class="menu"><ul>' + items + '</ul></div>' +
         '</nav>'
@@ -23,13 +23,21 @@
 
     var toggle = document.getElementById('nav-toggle');
     var topbar = document.getElementById('topbar');
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99;display:none;';
+    document.body.appendChild(overlay);
+
+    function closeNav() {
+        topbar.classList.remove('nav-open');
+        overlay.style.display = 'none';
+    }
     toggle.addEventListener('click', function () {
-        topbar.classList.toggle('nav-open');
+        var open = topbar.classList.toggle('nav-open');
+        overlay.style.display = open ? 'block' : 'none';
     });
+    overlay.addEventListener('click', closeNav);
     document.querySelectorAll('#topbar .menu a').forEach(function (a) {
-        a.addEventListener('click', function () { topbar.classList.remove('nav-open'); });
-    });
-    document.addEventListener('click', function (e) {
-        if (!topbar.contains(e.target)) topbar.classList.remove('nav-open');
+        a.addEventListener('click', closeNav);
     });
 }());

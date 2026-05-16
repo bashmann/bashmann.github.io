@@ -91,13 +91,20 @@ h4 {
     align-items: center;
     padding: 0 var(--showcasePadding);
 }
-.logo a {
-    text-decoration: none;
-}
-.logo img {
+.logo a { text-decoration: none; }
+.logo-img {
     height: 4vh;
     width: auto;
     display: block;
+}
+.logo-text {
+    display: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 200;
+    font-size: 0.85em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--textColor);
 }
 
 /* HAMBURGER */
@@ -239,6 +246,8 @@ h4 {
 
     /* NAV */
     #nav-toggle { display: flex; }
+    .logo-img { display: none; }
+    .logo-text { display: flex; align-items: center; }
     .menu {
         position: fixed;
         top: var(--topBarHeight);
@@ -249,11 +258,20 @@ h4 {
         background: var(--backgroundColor);
         padding: 0.5em 0 1.5em;
         box-shadow: 0 4px 16px rgba(0,0,0,0.7);
-        transform: translateY(-110%);
-        transition: transform 0.25s ease;
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        transform: translateY(-4px);
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s;
         z-index: 100;
     }
-    #topbar.nav-open .menu { transform: translateY(0); }
+    #topbar.nav-open .menu {
+        opacity: 1;
+        pointer-events: auto;
+        visibility: visible;
+        transform: translateY(0);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
     .menu ul {
         flex-direction: column;
         gap: 0;
@@ -268,14 +286,15 @@ h4 {
     .butTxt-hid { padding: 0; }
 
     /* TYPOGRAPHY */
-    h2 { font-size: 2.5em; }
-    h3 { font-size: 2em; }
+    h2 { font-size: 1.25em; }
+    h3 { font-size: 1em; }
     h4 { font-size: 1.5em; }
 
     /* PORTFOLIO GRID */
-    #portfolio ul { flex-wrap: wrap; }
-    #portfolio ul li { padding: 2vw; }
-    #portfolio ul li button img { height: 44vw; width: 44vw; }
+    #portfolio ul { grid-template-columns: 1fr; grid-template-rows: none; height: auto; gap: 2px; }
+    #portfolio ul li button { height: auto; }
+    #portfolio ul li button img { height: 28vh; }
+    #portfolio ul li button h4 { font-size: 1em; }
 
     /* PIECE IMAGES */
     #piece ul li img { max-width: 90vw; }
@@ -289,8 +308,14 @@ h4 {
     .projects-gallery .featured { width: 100% !important; }
 
     /* HOME */
-    #showcase { padding: var(--showcasePadding); }
-    #showcase p { margin: 1.5em 0; }
+    .logo-intro { display: none; }
+    #showcase { position: relative; z-index: 1; top: auto; min-height: 0; padding: 1rem var(--showcasePadding) 0.5rem; }
+    #showcase h2 { margin-bottom: 0.35em; }
+    #showcase h3 { font-weight: 400; }
+    #showcase p  { font-size: 0.65em; margin: 0.5em 0; line-height: 1.6; }
+    .butShow { padding: 8px 16px; letter-spacing: 1px; }
+    #social { position: relative; bottom: auto; left: auto; margin: 0.75em 0 1em var(--showcasePadding); width: 3.5em; }
+    .butSocial { width: 1.25em; }
 }
 
 /* PORTFOLIO GRID */
@@ -298,35 +323,42 @@ h4 {
     background: none;
     border: none;
     cursor: pointer;
+    display: block;
+    width: 100%;
 }
 #portfolio {
+    position: relative;
+    z-index: 1;
     padding: var(--showcasePadding);
-    position: absolute;
-    top: var(--topBarHeight);
     width: 100%;
 }
 #portfolio ul {
-    list-style: none;
-    display: flex;
-}
-#portfolio ul li {
-    padding: 1vw;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1vw;
+    height: calc(100vh - var(--topBarHeight) - var(--showcasePadding) * 2);
 }
 #portfolio ul li button {
     position: relative;
-    display: flex;
+    display: block;
+    width: 100%;
+    height: 100%;
     z-index: 10;
 }
 #portfolio ul li button img {
-    height: 17vw;
-    width: 17vw;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    display: block;
 }
 #portfolio ul li button h4 {
-    font-size: 3em;
+    font-size: 2em;
     visibility: hidden;
     display: flex;
     position: absolute;
+    top: 0;
+    left: 0;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -337,15 +369,15 @@ h4 {
 }
 #portfolio ul li button:hover h4 {
     visibility: visible;
-    background: rgba(0.2, 0.2, 0.2, 0.5);
+    background: rgba(0, 0, 0, 0.5);
     color: var(--textColor);
 }
 
 /* PORTFOLIO PIECE PAGE */
 #piece {
+    position: relative;
+    z-index: 1;
     padding: var(--showcasePadding);
-    position: absolute;
-    top: var(--topBarHeight);
     width: 100%;
 }
 #piece ul {

@@ -237,3 +237,16 @@ canvas { display: block; }
     padding: 6px 10px; font-size: 12px;
     font-family: monospace; color: #444; font-style: italic;
 }
+
+@media (max-width: 700px) {
+    html, body { overflow: auto; height: auto; }
+    #shader-wrap { flex-direction: column; min-height: calc(100vh - var(--topBarHeight)); }
+    #preview-pane {
+        width: 100%;
+        height: min(56.25vw, 45vh);
+        flex-shrink: 0;
+    }
+    #divider { display: none; }
+    #examples-panel { display: none; }
+    #editor-pane { min-height: 55vh; }
+}
