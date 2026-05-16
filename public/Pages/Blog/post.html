@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ben Ashcroft - Blog</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="background"></div>
+<div class="splash"></div>
+<script src="/topbar.js"></script>
+
+<section id="piece">
+    <div class="blog-post" id="blog-post">
+        <p>Loading...</p>
+    </div>
+</section>
+
+<style>
+    .blog-post {
+        max-width: 48em;
+        margin: 4em auto;
+        padding: 0 var(--showcasePadding);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75em;
+    }
+    .blog-back { font-size: 0.9em; color: var(--offTextColor); text-decoration: none; margin-bottom: 1em; display: inline-block; }
+    .blog-back:hover { color: var(--textColor); }
+    .blog-post h1 { font-size: 1.8em; margin-bottom: 0.25em; }
+    .blog-post h2 { font-size: 1.3em; margin-top: 1.5em; }
+    .blog-post h3 { font-size: 1.1em; margin-top: 1.25em; }
+    .blog-post p  { line-height: 1.7; }
+    .blog-post code { background: #1a1a1a; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.9em; }
+</style>
+
+<script>
+function _esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function parseMd(text) {
+    text = text.replace(/\r\n/g, '\n');
+    var lines = text.split('\n');
+    var html = '';
+    var para = [];
+
+    function flush() {
+        if (para.length) {
+            html += '<p>' + para.join(' ') + '</p>\n';
+            para = [];
+        }
+    }
+    function inline(s) {
+        return _esc(s)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/`(.+?)`/g, '<code>$1</code>');
+    }
+
+    lines.forEach(function(line) {
+        var m = line.match(/^(#{1,4})\s+(.+)/);
+        if (m) {
+            flush();
+            html += '<h' + m[1].length + '>' + inline(m[2]) + '</h' + m[1].length + '>\n';
+        } else if (line.trim() === '') {
+            flush();
+        } else {
+            para.push(inline(line.trimRight()));
+        }
+    });
+    flush();
+    return html;
+}
+
+var params = new URLSearchParams(window.location.search);
+var slug   = params.get('post') || '';
+var post   = document.getElementById('blog-post');
+
+if (!slug) {
+    post.innerHTML = '<a class="blog-back" href="/public/Pages/Blog/blog.html">Back</a><p>Post not found.</p>';
+} else {
+    fetch('/public/Pages/Blog/' + encodeURIComponent(slug) + '.md')
+        .then(function(r) {
+            if (!r.ok) throw new Error('not found');
+            return r.text();
+        })
+        .then(function(text) {
+            post.innerHTML = '<a class="blog-back" href="/public/Pages/Blog/blog.html">Back</a>' + parseMd(text);
+        })
+        .catch(function() {
+            post.innerHTML = '<a class="blog-back" href="/public/Pages/Blog/blog.html">Back</a><p>Post not found.</p>';
+        });
+}
+</script>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ben Ashcroft - Texture AutoPacker</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="background"></div>
+<div class="splash"></div>
+<script src="/topbar.js"></script>
+
+<section id="piece">
+    <div class="ap-page">
+        <div class="ap-body">
+            <div class="ap-text" id="ap-text"></div>
+            <div class="ap-images">
+                <img src="/public/Pages/AutoPacker/Images/AutoPackerEmpty.png" alt="AutoPacker - empty state">
+                <img src="/public/Pages/AutoPacker/Images/AutoPackerExample.png" alt="AutoPacker - example output">
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .ap-page { width: 100%; }
+    .ap-body { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; align-items: start; }
+    .ap-text h4 { font-size: 1.1em; font-weight: 600; letter-spacing: 0.08em; margin-top: 1.8em; margin-bottom: 0.5em; }
+    .ap-text h4:first-child { margin-top: 0; }
+    .ap-text p { font-size: 0.9em; line-height: 1.8; color: #ccc; margin-bottom: 0.8em; font-weight: 300; }
+    .ap-text ul { list-style: disc; padding-left: 1.4em; margin-bottom: 0.8em; }
+    .ap-text ul li { font-size: 0.9em; line-height: 1.8; color: #ccc; font-weight: 300; margin-bottom: 0.3em; }
+    .ap-text strong { color: #fff; font-weight: 600; }
+    .ap-text code { font-family: monospace; background: #222; padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.9em; }
+    .ap-images { display: flex; flex-direction: column; gap: 2vw; }
+    .ap-images img { width: 100%; display: block; }
+</style>
+
+<script>
+function _esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function inlineMd(s) {
+    return _esc(s)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`(.+?)`/g, '<code>$1</code>');
+}
+function parseMd(text) {
+    text = text.replace(/\r\n/g, '\n').replace(/^[ \t]+$/mg, '');
+    var blocks = text.trim().split(/\n{2,}/);
+    return blocks.map(function(block) {
+        block = block.trim();
+        if (!block) return '';
+        var m;
+        if (m = block.match(/^##\s+(.+)$/)) return '<h4>' + _esc(m[1]) + '</h4>';
+        var lines = block.split('\n');
+        if (/^- /.test(lines[0])) {
+            return '<ul>' + lines.map(function(l) {
+                var lm = l.match(/^- (.+)$/);
+                return lm ? '<li>' + inlineMd(lm[1]) + '</li>' : '';
+            }).join('') + '</ul>';
+        }
+        return '<p>' + inlineMd(lines.join(' ')) + '</p>';
+    }).join('');
+}
+
+fetch('/public/Pages/AutoPacker/Autopacker.md')
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+        document.getElementById('ap-text').innerHTML = parseMd(text);
+    });
+</script>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ben Ashcroft - MEL Scripting</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="background"></div>
+<div class="splash"></div>
+<script src="/topbar.js"></script>
+
+<section id="piece">
+    <div class="mel-page">
+        <div class="mel-nav" id="mel-nav"></div>
+        <div class="mel-sections" id="mel-sections"></div>
+    </div>
+</section>
+
+<style>
+    #piece {
+        height: calc(100vh - var(--topBarHeight));
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .mel-page { flex: 1; display: flex; flex-direction: column; min-height: 0; width: 100%; }
+    .mel-nav { flex-shrink: 0; display: flex; gap: 0; border-bottom: 1px solid #333; margin-bottom: 2vw; }
+    .mel-tab {
+        background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
+        padding: 0.6em 1.4em; font-size: 0.85em; font-weight: 500; letter-spacing: 0.08em;
+        text-transform: uppercase; color: #888; cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .mel-tab:hover  { color: #ccc; }
+    .mel-tab.active { color: #fff; border-bottom-color: #fff; }
+    .mel-sections { flex: 1; min-height: 0; }
+    .mel-section { display: none; }
+    .mel-section.active { display: flex; height: 100%; }
+    .mel-body { display: flex; gap: 3vw; width: 100%; min-height: 0; }
+    .mel-desc { flex: 1; overflow-y: auto; }
+    .mel-desc p { font-size: 0.9em; line-height: 1.8; color: #ccc; font-weight: 300; margin-bottom: 0.8em; }
+    .mel-code-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
+    .mel-copy {
+        position: absolute; top: 0.5em; right: 1.6em; background: #2d2d2d; border: 1px solid #444;
+        border-radius: 3px; color: #aaa; font-size: 0.75em; padding: 0.2em 0.7em;
+        cursor: pointer; transition: color 0.15s, background 0.15s; z-index: 1;
+    }
+    .mel-copy:hover { background: #3a3a3a; color: #fff; }
+    .mel-code {
+        background: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 4px;
+        padding: 1.2em 1.4em; padding-top: 2.6em;
+        font-family: Consolas, 'Courier New', monospace; font-size: 0.82em; line-height: 1.6;
+        overflow: auto; white-space: pre; flex: 1; min-height: 0;
+        scrollbar-color: #444 #1e1e1e; scrollbar-width: thin;
+    }
+    .mel-code::-webkit-scrollbar { width: 8px; height: 8px; }
+    .mel-code::-webkit-scrollbar-track { background: #1e1e1e; }
+    .mel-code::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    .mel-code::-webkit-scrollbar-thumb:hover { background: #555; }
+    .mc { color: #6a9955; } .ms { color: #ce9178; } .mb { color: #dcdcaa; }
+    .mv { color: #9cdcfe; } .mn { color: #b5cea8; } .mk { color: #569cd6; }
+</style>
+
+<script>
+function parseMelMd(text) {
+    text = text.replace(/\r\n/g, '\n');
+    var lines = text.split('\n');
+    var title = '', descLines = [], codeLines = [], inCode = false;
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (!title) { if (line.trim()) title = line.trim(); continue; }
+        if (!inCode && /^\s*\/\//.test(line)) inCode = true;
+        if (inCode) codeLines.push(line);
+        else        descLines.push(line);
+    }
+    var blocks = [], cur = [];
+    for (var i = 0; i < descLines.length; i++) {
+        if (descLines[i].trim() === '') {
+            if (cur.length) { blocks.push(cur.join(' ')); cur = []; }
+        } else { cur.push(descLines[i].trim()); }
+    }
+    if (cur.length) blocks.push(cur.join(' '));
+    return { title: title, desc: blocks.filter(Boolean), code: codeLines.join('\n').replace(/\s+$/, '') };
+}
+
+function melHl(code) {
+    var kw = ['proc','string','int','float','vector','matrix','for','if','else','while','do','return','global','local','in','true','false'];
+    var out = '', i = 0, len = code.length;
+    function e(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    while (i < len) {
+        var c = code[i];
+        if (c === '/' && i+1 < len && code[i+1] === '/') {
+            var end = code.indexOf('\n', i); if (end === -1) end = len;
+            out += '<span class="mc">' + e(code.slice(i,end)) + '</span>'; i = end; continue;
+        }
+        if (c === '"') {
+            var j = i+1;
+            while (j < len && code[j] !== '"') { if (code[j] === '\\') j++; j++; } j++;
+            out += '<span class="ms">' + e(code.slice(i,j)) + '</span>'; i = j; continue;
+        }
+        if (c === '`') {
+            var end = code.indexOf('`', i+1); if (end === -1) end = len-1; end++;
+            out += '<span class="mb">' + e(code.slice(i,end)) + '</span>'; i = end; continue;
+        }
+        if (c === '$') {
+            var j = i+1; while (j < len && /\w/.test(code[j])) j++;
+            out += '<span class="mv">' + e(code.slice(i,j)) + '</span>'; i = j; continue;
+        }
+        if (/\d/.test(c)) {
+            var j = i; while (j < len && /[\d.]/.test(code[j])) j++;
+            out += '<span class="mn">' + e(code.slice(i,j)) + '</span>'; i = j; continue;
+        }
+        if (/[a-zA-Z_]/.test(c)) {
+            var j = i; while (j < len && /\w/.test(code[j])) j++;
+            var word = code.slice(i,j);
+            out += kw.indexOf(word) !== -1 ? '<span class="mk">'+e(word)+'</span>' : e(word);
+            i = j; continue;
+        }
+        out += e(c); i++;
+    }
+    return out;
+}
+
+function melShow(i) {
+    document.querySelectorAll('.mel-tab').forEach(function(t,j) { t.classList.toggle('active', i===j); });
+    document.querySelectorAll('.mel-section').forEach(function(s,j) { s.classList.toggle('active', i===j); });
+}
+function melCopy(btn) {
+    navigator.clipboard.writeText(btn.nextElementSibling.textContent).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+    });
+}
+
+var melFiles = [
+    '/public/Pages/MEL/CopyToAllPoints.md',
+    '/public/Pages/MEL/UnfreezeTransforms.md',
+    '/public/Pages/MEL/HighestPolyObject.md',
+    '/public/Pages/MEL/UnrealExport.md'
+];
+
+Promise.all(melFiles.map(function(url) {
+    return fetch(url).then(function(r) { return r.text(); });
+})).then(function(texts) {
+    var scripts = texts.map(parseMelMd);
+    var nav  = document.getElementById('mel-nav');
+    var secs = document.getElementById('mel-sections');
+
+    scripts.forEach(function(s, i) {
+        var tab = document.createElement('button');
+        tab.className = 'mel-tab' + (i === 0 ? ' active' : '');
+        tab.textContent = s.title;
+        tab.onclick = function() { melShow(i); };
+        nav.appendChild(tab);
+
+        var sec = document.createElement('div');
+        sec.className = 'mel-section' + (i === 0 ? ' active' : '');
+        sec.innerHTML =
+            '<div class="mel-body">' +
+            '<div class="mel-desc">' + s.desc.map(function(p) { return '<p>' + p + '</p>'; }).join('') + '</div>' +
+            '<div class="mel-code-wrap"><button class="mel-copy" onclick="melCopy(this)">Copy</button><pre class="mel-code">' + melHl(s.code) + '</pre></div>' +
+            '</div>';
+        secs.appendChild(sec);
+    });
+});
+</script>
+
+<script src="/app.js"></script>
+</body>
+</html>
